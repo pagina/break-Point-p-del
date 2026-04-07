@@ -1124,13 +1124,18 @@
     // DYNAMIC HOURS BLOCKING
     // ============================================================
     async function updateAvailableHours() {
-      if (!sbClient) return;
+      if (!sbClient) {
+        console.warn('Supabase Client not initialized');
+        return;
+      }
 
       const sede = document.getElementById('resSede').value;
       const fecha = document.getElementById('resFecha').value;
       const selectHora = document.getElementById('resHora');
 
       if (!selectHora) return;
+
+      console.log('Checking availability for:', { sede, fecha });
 
       // Reset hours status
       Array.from(selectHora.options).forEach(opt => {
@@ -1151,12 +1156,15 @@
           .neq('estado', 'cancelada');
 
         if (error) {
-          console.warn('Error fetching availability:', error);
+          console.error('Error fetching availability:', error);
           return;
         }
 
+        console.log('Reservations found:', data);
+
         if (data && data.length > 0) {
           const takenHours = data.map(r => r.hora);
+          console.log('Blocking these hours:', takenHours);
 
           Array.from(selectHora.options).forEach(opt => {
             if (takenHours.includes(opt.value)) {

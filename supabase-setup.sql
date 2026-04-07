@@ -115,62 +115,83 @@ ALTER TABLE eventos ENABLE ROW LEVEL SECURITY;
 -- ===== POLÍTICAS PÚBLICAS (lectura) =====
 
 -- Galería: todos pueden ver
+DROP POLICY IF EXISTS "gallery_public_read" ON gallery_images;
 CREATE POLICY "gallery_public_read" ON gallery_images
   FOR SELECT USING (true);
 
 -- Menú: todos pueden ver
+DROP POLICY IF EXISTS "menu_public_read" ON menu_items;
 CREATE POLICY "menu_public_read" ON menu_items
   FOR SELECT USING (true);
 
 -- Contenido del sitio: todos pueden ver
+DROP POLICY IF EXISTS "content_public_read" ON site_content;
 CREATE POLICY "content_public_read" ON site_content
   FOR SELECT USING (true);
 
 -- Eventos: todos pueden ver los activos
+DROP POLICY IF EXISTS "eventos_public_read" ON eventos;
 CREATE POLICY "eventos_public_read" ON eventos
   FOR SELECT USING (true);
 
 -- ===== POLÍTICAS PÚBLICAS (escritura limitada) =====
 
 -- Reservas: cualquiera puede crear
+DROP POLICY IF EXISTS "reservas_public_insert" ON reservas;
 CREATE POLICY "reservas_public_insert" ON reservas
   FOR INSERT WITH CHECK (true);
 
+-- Reservas: cualquiera puede leer (solo para chequear disponibilidad)
+DROP POLICY IF EXISTS "reservas_public_read" ON reservas;
+CREATE POLICY "reservas_public_read" ON reservas
+  FOR SELECT USING (true);
+
 -- Mensajes: cualquiera puede crear
+DROP POLICY IF EXISTS "mensajes_public_insert" ON mensajes_contacto;
 CREATE POLICY "mensajes_public_insert" ON mensajes_contacto
   FOR INSERT WITH CHECK (true);
 
 -- Inscripciones: cualquiera puede crear
+DROP POLICY IF EXISTS "inscripciones_public_insert" ON inscripciones_torneos;
 CREATE POLICY "inscripciones_public_insert" ON inscripciones_torneos
   FOR INSERT WITH CHECK (true);
 
 -- Turnos fijos: cualquiera puede crear
+DROP POLICY IF EXISTS "turnos_public_insert" ON turnos_fijos;
 CREATE POLICY "turnos_public_insert" ON turnos_fijos
   FOR INSERT WITH CHECK (true);
 
 -- ===== POLÍTICAS ADMIN (CRUD completo para usuarios autenticados) =====
 
+DROP POLICY IF EXISTS "gallery_admin_all" ON gallery_images;
 CREATE POLICY "gallery_admin_all" ON gallery_images
   FOR ALL USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "menu_admin_all" ON menu_items;
 CREATE POLICY "menu_admin_all" ON menu_items
   FOR ALL USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "reservas_admin_all" ON reservas;
 CREATE POLICY "reservas_admin_all" ON reservas
   FOR ALL USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "mensajes_admin_all" ON mensajes_contacto;
 CREATE POLICY "mensajes_admin_all" ON mensajes_contacto
   FOR ALL USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "inscripciones_admin_all" ON inscripciones_torneos;
 CREATE POLICY "inscripciones_admin_all" ON inscripciones_torneos
   FOR ALL USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "turnos_admin_all" ON turnos_fijos;
 CREATE POLICY "turnos_admin_all" ON turnos_fijos
   FOR ALL USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "content_admin_all" ON site_content;
 CREATE POLICY "content_admin_all" ON site_content
   FOR ALL USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "eventos_admin_all" ON eventos;
 CREATE POLICY "eventos_admin_all" ON eventos
   FOR ALL USING (auth.role() = 'authenticated');
 
@@ -194,7 +215,8 @@ INSERT INTO menu_items (category, name, description, emoji, display_order) VALUE
   ('picadas', 'Tabla de Quesos', 'Selección de quesos con frutos secos', '🧀', 1),
   ('picadas', 'Papas con Cheddar', 'Papas fritas con salsa cheddar', '🍟', 2),
   ('picadas', 'Nachos Completos', 'Nachos con guacamole, cheddar y jalapeños', '🥓', 3),
-  ('picadas', 'Empanadas del Día', 'Empanadas caseras variadas', '🫓', 4);
+  ('picadas', 'Empanadas del Día', 'Empanadas caseras variadas', '🫓', 4)
+ON CONFLICT DO NOTHING;
 
 -- ============================================================
 -- CONTENIDO INICIAL DEL SITIO
@@ -208,7 +230,8 @@ INSERT INTO site_content (id, content) VALUES
   ('about_text_2', 'Con 3 sedes en zona sur, somos el club elegido por miles de jugadores que buscan calidad, comunidad y pasión por el deporte.'),
   ('whatsapp_number', '5493513247898'),
   ('instagram_handle', 'breakpoint.padel'),
-  ('nomade_instagram', 'nomade_cba');
+  ('nomade_instagram', 'nomade_cba')
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- DATOS INICIALES - GALERÍA DE IMÁGENES
@@ -222,7 +245,8 @@ INSERT INTO gallery_images (url, storage_path, title, category, display_order) V
   ('images/bar-nomade.png', '', '🍺 Nomade Bar', 'bar', 3),
   ('images/padel-action.png', '', '💪 Acción pura', 'canchas', 4),
   ('images/club-exterior.png', '', '✨ Ambiente nocturno', 'exterior', 5),
-  ('images/tournament-event.png', '', '🏆 Torneos', 'eventos', 6);
+  ('images/tournament-event.png', '', '🏆 Torneos', 'eventos', 6)
+ON CONFLICT DO NOTHING;
 
 -- ============================================================
 -- STORAGE BUCKET PARA IMÁGENES
