@@ -211,6 +211,20 @@ INSERT INTO site_content (id, content) VALUES
   ('nomade_instagram', 'nomade_cba');
 
 -- ============================================================
+-- DATOS INICIALES - GALERÍA DE IMÁGENES
+-- ============================================================
+-- NOTA: Estas URLs usan rutas relativas que funcionan cuando
+-- el sitio está hosteado. Si usás un dominio, reemplazá con URLs completas.
+
+INSERT INTO gallery_images (url, storage_path, title, category, display_order) VALUES
+  ('images/hero-bg.png', '', '🎾 Canchas en acción', 'canchas', 1),
+  ('images/courts-view.png', '', '🏟️ Canchas premium', 'canchas', 2),
+  ('images/bar-nomade.png', '', '🍺 Nomade Bar', 'bar', 3),
+  ('images/padel-action.png', '', '💪 Acción pura', 'canchas', 4),
+  ('images/club-exterior.png', '', '✨ Ambiente nocturno', 'exterior', 5),
+  ('images/tournament-event.png', '', '🏆 Torneos', 'eventos', 6);
+
+-- ============================================================
 -- STORAGE BUCKET PARA IMÁGENES
 -- ============================================================
 -- NOTA: Crear manualmente en Supabase Dashboard > Storage:

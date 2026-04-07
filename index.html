@@ -59,7 +59,7 @@
       <h1 class="hero-title">
         <span class="accent-text">Breakpoint</span><br/>Pádel
       </h1>
-      <p class="hero-subtitle">
+      <p class="hero-subtitle" data-content-id="hero_subtitle">
         Viví la mejor experiencia de pádel en Córdoba. Canchas premium, torneos, clases y el mejor ambiente para tu tercer tiempo.
       </p>
       <div class="hero-buttons">
@@ -105,10 +105,10 @@
         <div class="about-text reveal-right">
           <div class="section-tag">🎯 Sobre Nosotros</div>
           <h2>Tu punto de encuentro<br/>para el <span class="highlight">mejor pádel</span></h2>
-          <p>
+          <p data-content-id="about_text_1">
             Breakpoint Pádel nació con la misión de ofrecer la experiencia de pádel más completa de Córdoba. Canchas de primera, iluminación profesional y un ambiente que te hace querer volver.
           </p>
-          <p>
+          <p data-content-id="about_text_2">
             Con 3 sedes en zona sur, somos el club elegido por miles de jugadores que buscan calidad, comunidad y pasión por el deporte.
           </p>
           <div class="about-features">
@@ -296,7 +296,8 @@
         <h2 class="section-title">Conocé nuestro <span class="highlight">club</span></h2>
         <p class="section-subtitle">Mirá nuestras instalaciones, canchas y el ambiente que nos hace únicos.</p>
       </div>
-      <div class="gallery-grid reveal">
+      <div class="gallery-grid reveal" id="dynamicGallery">
+        <!-- Fallback estático (se reemplaza si Supabase tiene datos) -->
         <div class="gallery-item">
           <img src="images/hero-bg.png" alt="Cancha de pádel en acción" />
           <div class="gallery-item-overlay">
@@ -357,7 +358,8 @@
       </div>
 
       <!-- Menú / Catálogo -->
-      <div class="nomade-menu-grid">
+      <div class="nomade-menu-grid" id="dynamicMenu">
+        <!-- Fallback estático (se reemplaza si Supabase tiene datos) -->
         <div class="nomade-menu-card reveal">
           <div class="menu-icon">🍔</div>
           <h4>Hamburguesas & Sándwiches</h4>
@@ -825,7 +827,7 @@
           </div>
           <div class="modal-form-group">
             <label for="resSede">Sede *</label>
-            <select id="resSede" required>
+            <select id="resSede" onchange="updateAvailableHours()" required>
               <option value="">Seleccioná una sede</option>
               <option value="Malagueño">📍 Sede Malagueño - Av. Malagueño 2406</option>
               <option value="O'Higgins">📍 Sede O'Higgins - Av. B. O'Higgins 5655</option>
@@ -835,7 +837,7 @@
           <div class="modal-form-row">
             <div class="modal-form-group">
               <label for="resFecha">Fecha *</label>
-              <input type="date" id="resFecha" required />
+              <input type="date" id="resFecha" onchange="updateAvailableHours()" required />
             </div>
             <div class="modal-form-group">
               <label for="resHora">Hora *</label>
@@ -1006,7 +1008,7 @@
     // SUPABASE CONFIG
     // ============================================================
     const SUPABASE_URL = 'https://joojnfeficesvoupwmsw.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_KTnQH9EtdjwcvoB2GkEZlg_7cGcO5aS';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impvb2puZmVmaWNlc3ZvdXB3bXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNDQ3NTcsImV4cCI6MjA5MDgyMDc1N30.ZNRK_M8HcI6py1smNMSXyQ4sXrLDnQmtN7wTt_U49lE';
     let sbClient = null;
     try {
       sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1036,6 +1038,9 @@
     function openSiteModal(id) {
       document.getElementById(id).classList.add('show');
       document.body.style.overflow = 'hidden';
+      if (id === 'reservaModal') {
+        updateAvailableHours();
+      }
     }
 
     function closeSiteModal(e, id) {
@@ -1113,6 +1118,56 @@
       btn.innerHTML = '<span class="btn-icon">📲</span> Reservar Cancha';
 
       window.open(`https://wa.me/5493513247898?text=${waText}`, '_blank');
+    }
+
+    // ============================================================
+    // DYNAMIC HOURS BLOCKING
+    // ============================================================
+    async function updateAvailableHours() {
+      if (!sbClient) return;
+
+      const sede = document.getElementById('resSede').value;
+      const fecha = document.getElementById('resFecha').value;
+      const selectHora = document.getElementById('resHora');
+
+      if (!selectHora) return;
+
+      // Reset hours status
+      Array.from(selectHora.options).forEach(opt => {
+        if (opt.value === '') return;
+        opt.disabled = false;
+        opt.textContent = opt.value; // Reset label
+      });
+
+      if (!sede || !fecha) return;
+
+      try {
+        // Query taken hours
+        const { data, error } = await sbClient
+          .from('reservas')
+          .select('hora')
+          .eq('sede', sede)
+          .eq('fecha', fecha)
+          .neq('estado', 'cancelada');
+
+        if (error) {
+          console.warn('Error fetching availability:', error);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          const takenHours = data.map(r => r.hora);
+
+          Array.from(selectHora.options).forEach(opt => {
+            if (takenHours.includes(opt.value)) {
+              opt.disabled = true;
+              opt.textContent = `${opt.value} (No disponible)`;
+            }
+          });
+        }
+      } catch(e) {
+        console.error('CheckAvailability error:', e);
+      }
     }
 
     // ============================================================
@@ -1391,6 +1446,111 @@
     // INIT - Wire up buttons after DOM ready
     // ============================================================
     wireReservaButtons();
+
+    // ============================================================
+    // DYNAMIC CONTENT FROM SUPABASE
+    // ============================================================
+    async function loadDynamicContent() {
+      if (!sbClient) return;
+      try {
+        const { data } = await sbClient.from('site_content').select('*');
+        if (!data || data.length === 0) return;
+
+        data.forEach(item => {
+          // Update elements with matching data-content-id
+          const els = document.querySelectorAll(`[data-content-id="${item.id}"]`);
+          els.forEach(el => {
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+              el.value = item.content;
+            } else {
+              el.textContent = item.content;
+            }
+          });
+        });
+      } catch(e) {
+        console.warn('Could not load dynamic content:', e);
+      }
+    }
+
+    async function loadDynamicGallery() {
+      if (!sbClient) return;
+      try {
+        const { data } = await sbClient.from('gallery_images').select('*').order('display_order');
+        if (!data || data.length === 0) return; // Keep static fallback
+
+        const container = document.getElementById('dynamicGallery');
+        if (!container) return;
+
+        container.innerHTML = data.map(img => `
+          <div class="gallery-item">
+            <img src="${img.url}" alt="${img.title || 'Breakpoint Pádel'}" loading="lazy" />
+            <div class="gallery-item-overlay">
+              <span>${img.title || ''}</span>
+            </div>
+          </div>
+        `).join('');
+
+        // Re-trigger reveal animation
+        container.classList.add('visible');
+      } catch(e) {
+        console.warn('Could not load gallery:', e);
+      }
+    }
+
+    async function loadDynamicMenu() {
+      if (!sbClient) return;
+      try {
+        const { data } = await sbClient.from('menu_items').select('*').eq('available', true).order('category').order('display_order');
+        if (!data || data.length === 0) return; // Keep static fallback
+
+        const container = document.getElementById('dynamicMenu');
+        if (!container) return;
+
+        // Group by category
+        const categories = {};
+        const categoryNames = {
+          hamburguesas: 'Hamburguesas & Sándwiches',
+          tragos: 'Tragos de Autor',
+          cervezas: 'Cervezas Artesanales',
+          picadas: 'Picadas & Snacks'
+        };
+        const categoryIcons = {
+          hamburguesas: '🍔',
+          tragos: '🍹',
+          cervezas: '🍺',
+          picadas: '🧆'
+        };
+        const categoryDescs = {
+          hamburguesas: 'Las mejores hamburguesas y sándwiches. Todas con papas.',
+          tragos: 'Cócteles únicos con la firma Nomade. Frescos y creativos.',
+          cervezas: 'Tirada y en lata. La mejor selección para tu tercer tiempo.',
+          picadas: 'Para compartir entre amigos después del partido.'
+        };
+
+        data.forEach(item => {
+          if (!categories[item.category]) categories[item.category] = [];
+          categories[item.category].push(item);
+        });
+
+        container.innerHTML = Object.keys(categories).map(cat => `
+          <div class="nomade-menu-card reveal visible">
+            <div class="menu-icon">${categoryIcons[cat] || '🍽️'}</div>
+            <h4>${categoryNames[cat] || cat}</h4>
+            <p>${categoryDescs[cat] || ''}</p>
+            <div class="menu-items">
+              ${categories[cat].map(item => `<span>${item.emoji} ${item.name}</span>`).join('')}
+            </div>
+          </div>
+        `).join('');
+      } catch(e) {
+        console.warn('Could not load menu:', e);
+      }
+    }
+
+    // Load everything from Supabase
+    loadDynamicContent();
+    loadDynamicGallery();
+    loadDynamicMenu();
   </script>
 
 </body>

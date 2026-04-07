@@ -362,7 +362,7 @@
     // SUPABASE CONFIG
     // ============================================================
     const SUPABASE_URL = 'https://joojnfeficesvoupwmsw.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_KTnQH9EtdjwcvoB2GkEZlg_7cGcO5aS';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impvb2puZmVmaWNlc3ZvdXB3bXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNDQ3NTcsImV4cCI6MjA5MDgyMDc1N30.ZNRK_M8HcI6py1smNMSXyQ4sXrLDnQmtN7wTt_U49lE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // ============================================================
@@ -729,60 +729,84 @@
         <div class="gallery-upload-zone" onclick="document.getElementById('galleryFileInput').click()">
           <div class="upload-icon">➕</div>
           <span>Subir imagen</span>
-          <input type="file" id="galleryFileInput" accept="image/*" style="display:none" onchange="handleGalleryUpload(event)" />
+          <input type="file" id="galleryFileInput" accept="image/*" style="display:none" onchange="handleGalleryUpload(event)" multiple />
         </div>
       `;
 
       if (data && data.length > 0) {
-        html += data.map(img => `
+        html += data.map(img => {
+          const isLocal = !img.storage_path || img.storage_path === '';
+          const badgeType = isLocal ? '📁 Local' : '☁️ Subida';
+          const badgeColor = isLocal ? 'var(--warning)' : 'var(--accent)';
+          return `
           <div class="gallery-admin-item">
-            <img src="${img.url}" alt="${img.title || 'Imagen'}" loading="lazy" />
-            <div class="item-title">${img.title || 'Sin título'}</div>
+            <img src="${img.url}" alt="${img.title || 'Imagen'}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 200%22><rect fill=%22%231a1a28%22 width=%22200%22 height=%22200%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23666%22 font-size=%2240%22>📷</text></svg>'" />
+            <div class="item-title">
+              <span style="font-size:10px;display:inline-block;padding:1px 6px;border-radius:4px;background:rgba(0,0,0,0.5);color:${badgeColor};margin-right:4px">${badgeType}</span>
+              ${img.title || 'Sin título'}
+            </div>
             <div class="item-overlay">
               <button class="btn btn-sm btn-secondary" onclick="editGalleryItem('${img.id}','${escapeHtml(img.title || '')}')">✏️ Editar</button>
               <button class="btn btn-sm btn-danger" onclick="deleteGalleryItem('${img.id}','${img.storage_path || ''}')">🗑 Eliminar</button>
             </div>
           </div>
-        `).join('');
+        `}).join('');
       }
 
+      // Show count
+      const count = data ? data.length : 0;
       grid.innerHTML = html;
+
+      // Update header with count
+      const header = grid.closest('.data-panel')?.querySelector('.data-panel-header h3');
+      if (header) header.textContent = `📸 Galería de Imágenes (${count})`;
     }
 
     async function handleGalleryUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
+      const files = e.target.files;
+      if (!files || files.length === 0) return;
 
-      showToast('Subiendo imagen...', 'info');
+      for (const file of files) {
+        showToast(`Subiendo ${file.name}...`, 'info');
 
-      const fileName = `gallery/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+        const fileName = `gallery/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
 
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await sb.storage
-        .from('gallery')
-        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+        // Upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await sb.storage
+          .from('gallery')
+          .upload(fileName, file, { cacheControl: '3600', upsert: false });
 
-      if (uploadError) {
-        showToast('Error al subir: ' + uploadError.message, 'error');
-        return;
+        if (uploadError) {
+          showToast('Error al subir ' + file.name + ': ' + uploadError.message, 'error');
+          continue;
+        }
+
+        // Get public URL
+        const { data: urlData } = sb.storage.from('gallery').getPublicUrl(fileName);
+
+        // Get current max order
+        const { data: maxOrder } = await sb.from('gallery_images')
+          .select('display_order')
+          .order('display_order', { ascending: false })
+          .limit(1);
+        const nextOrder = (maxOrder && maxOrder[0] ? maxOrder[0].display_order : 0) + 1;
+
+        // Save to DB
+        const { error: dbError } = await sb.from('gallery_images').insert({
+          url: urlData.publicUrl,
+          storage_path: fileName,
+          title: file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' '),
+          display_order: nextOrder
+        });
+
+        if (dbError) {
+          showToast('Error al guardar ' + file.name, 'error');
+          continue;
+        }
+
+        showToast(`${file.name} subida ✓`, 'success');
       }
 
-      // Get public URL
-      const { data: urlData } = sb.storage.from('gallery').getPublicUrl(fileName);
-
-      // Save to DB
-      const { error: dbError } = await sb.from('gallery_images').insert({
-        url: urlData.publicUrl,
-        storage_path: fileName,
-        title: file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ')
-      });
-
-      if (dbError) {
-        showToast('Error al guardar: ' + dbError.message, 'error');
-        return;
-      }
-
-      showToast('Imagen subida correctamente ✓', 'success');
       loadGallery();
       e.target.value = '';
     }
@@ -793,25 +817,42 @@
           <label>Título / Descripción</label>
           <input type="text" id="editGalleryTitle" value="${currentTitle}" placeholder="Ej: Cancha indoor nocturna" />
         </div>
+        <div class="form-group">
+          <label>Categoría</label>
+          <select id="editGalleryCategory">
+            <option value="general">General</option>
+            <option value="canchas">Canchas</option>
+            <option value="bar">Bar / Nomade</option>
+            <option value="exterior">Exterior</option>
+            <option value="eventos">Eventos / Torneos</option>
+          </select>
+        </div>
       `, `
         <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-        <button class="btn btn-primary" onclick="saveGalleryTitle('${id}')">💾 Guardar</button>
+        <button class="btn btn-primary" onclick="saveGalleryEdit('${id}')">💾 Guardar</button>
       `);
     }
 
-    async function saveGalleryTitle(id) {
+    async function saveGalleryEdit(id) {
       const title = document.getElementById('editGalleryTitle').value;
-      await sb.from('gallery_images').update({ title }).eq('id', id);
-      showToast('Título actualizado', 'success');
+      const category = document.getElementById('editGalleryCategory').value;
+      await sb.from('gallery_images').update({ title, category }).eq('id', id);
+      showToast('Imagen actualizada', 'success');
       closeModal();
       loadGallery();
     }
 
     async function deleteGalleryItem(id, storagePath) {
+      const isLocal = !storagePath || storagePath === '';
+      const extraMsg = isLocal
+        ? '<div style="margin-top:8px;font-size:12px;color:var(--warning)">⚠️ Esta es una imagen local. Se eliminará de la galería pero el archivo original se mantiene en el servidor.</div>'
+        : '';
+
       openModal('🗑 Eliminar Imagen', `
         <div class="confirm-dialog">
           <div class="confirm-icon">⚠️</div>
-          <p>¿Seguro que querés eliminar esta imagen? Esta acción no se puede deshacer.</p>
+          <p>¿Seguro que querés eliminar esta imagen de la galería?</p>
+          ${extraMsg}
           <div class="confirm-actions">
             <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
             <button class="btn btn-danger" onclick="confirmDeleteGallery('${id}','${storagePath}')">🗑 Eliminar</button>
@@ -821,13 +862,13 @@
     }
 
     async function confirmDeleteGallery(id, storagePath) {
-      // Delete from storage
-      if (storagePath) {
+      // Only delete from storage if it's a Supabase-uploaded file
+      if (storagePath && storagePath.startsWith('gallery/')) {
         await sb.storage.from('gallery').remove([storagePath]);
       }
       // Delete from DB
       await sb.from('gallery_images').delete().eq('id', id);
-      showToast('Imagen eliminada', 'success');
+      showToast('Imagen eliminada de la galería', 'success');
       closeModal();
       loadGallery();
     }
