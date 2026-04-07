@@ -14,6 +14,9 @@
 </head>
 <body>
 
+  <!-- Toast Notifications -->
+  <div class="site-toast-container" id="siteToastContainer"></div>
+
   <!-- ========== NAVBAR ========== -->
   <nav class="navbar" id="navbar">
     <div class="container">
@@ -797,8 +800,491 @@
     </a>
   </div>
 
+  <!-- ========== RESERVATION MODAL ========== -->
+  <div class="site-modal-overlay" id="reservaModal" onclick="closeSiteModal(event, 'reservaModal')">
+    <div class="site-modal" onclick="event.stopPropagation()">
+      <div class="site-modal-header">
+        <h3>🎾 Reservar Cancha</h3>
+        <button class="site-modal-close" onclick="closeSiteModal(null,'reservaModal')">&times;</button>
+      </div>
+      <div class="site-modal-body">
+        <form id="reservaForm" onsubmit="handleReservaSubmit(event)">
+          <div class="modal-form-row">
+            <div class="modal-form-group">
+              <label for="resNombre">Nombre completo *</label>
+              <input type="text" id="resNombre" placeholder="Tu nombre" required />
+            </div>
+            <div class="modal-form-group">
+              <label for="resTelefono">Teléfono / WhatsApp *</label>
+              <input type="tel" id="resTelefono" placeholder="351 234-5678" required />
+            </div>
+          </div>
+          <div class="modal-form-group">
+            <label for="resEmail">Email (opcional)</label>
+            <input type="email" id="resEmail" placeholder="tu@email.com" />
+          </div>
+          <div class="modal-form-group">
+            <label for="resSede">Sede *</label>
+            <select id="resSede" required>
+              <option value="">Seleccioná una sede</option>
+              <option value="Malagueño">📍 Sede Malagueño - Av. Malagueño 2406</option>
+              <option value="O'Higgins">📍 Sede O'Higgins - Av. B. O'Higgins 5655</option>
+              <option value="Epifanía">📍 Sede Epifanía - Epifanía Raspanti 14</option>
+            </select>
+          </div>
+          <div class="modal-form-row">
+            <div class="modal-form-group">
+              <label for="resFecha">Fecha *</label>
+              <input type="date" id="resFecha" required />
+            </div>
+            <div class="modal-form-group">
+              <label for="resHora">Hora *</label>
+              <select id="resHora" required>
+                <option value="">Seleccioná hora</option>
+                <option value="10:00">10:00</option>
+                <option value="11:00">11:00</option>
+                <option value="12:00">12:00</option>
+                <option value="13:00">13:00</option>
+                <option value="14:00">14:00</option>
+                <option value="15:00">15:00</option>
+                <option value="16:00">16:00</option>
+                <option value="17:00">17:00</option>
+                <option value="17:30">17:30</option>
+                <option value="18:00">18:00</option>
+                <option value="18:30">18:30</option>
+                <option value="19:00">19:00</option>
+                <option value="19:30">19:30</option>
+                <option value="20:00">20:00</option>
+                <option value="20:30">20:30</option>
+                <option value="21:00">21:00</option>
+                <option value="21:30">21:30</option>
+                <option value="22:00">22:00</option>
+                <option value="22:30">22:30</option>
+                <option value="23:00">23:00</option>
+                <option value="23:30">23:30</option>
+                <option value="00:00">00:00</option>
+                <option value="00:30">00:30</option>
+                <option value="01:00">01:00</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-form-group">
+            <label for="resNotas">Notas (opcional)</label>
+            <textarea id="resNotas" placeholder="Ej: preferimos cancha indoor, somos 4 jugadores..."></textarea>
+          </div>
+          <div class="site-modal-footer" style="padding:0;margin-top:8px">
+            <button type="submit" class="btn btn-primary" id="btnReservaSubmit" style="flex:1;justify-content:center">
+              <span class="btn-icon">📲</span> Reservar Cancha
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TURNO FIJO MODAL ========== -->
+  <div class="site-modal-overlay" id="turnoModal" onclick="closeSiteModal(event, 'turnoModal')">
+    <div class="site-modal" onclick="event.stopPropagation()">
+      <div class="site-modal-header">
+        <h3>📅 Solicitar Turno Fijo</h3>
+        <button class="site-modal-close" onclick="closeSiteModal(null,'turnoModal')">&times;</button>
+      </div>
+      <div class="site-modal-body">
+        <form id="turnoForm" onsubmit="handleTurnoSubmit(event)">
+          <div class="modal-form-row">
+            <div class="modal-form-group">
+              <label for="turNombre">Nombre completo *</label>
+              <input type="text" id="turNombre" required />
+            </div>
+            <div class="modal-form-group">
+              <label for="turTelefono">Teléfono *</label>
+              <input type="tel" id="turTelefono" required />
+            </div>
+          </div>
+          <div class="modal-form-group">
+            <label for="turSede">Sede *</label>
+            <select id="turSede" required>
+              <option value="">Seleccioná una sede</option>
+              <option value="Malagueño">Sede Malagueño</option>
+              <option value="O'Higgins">Sede O'Higgins</option>
+              <option value="Epifanía">Sede Epifanía</option>
+            </select>
+          </div>
+          <div class="modal-form-row">
+            <div class="modal-form-group">
+              <label for="turDia">Día de la semana *</label>
+              <select id="turDia" required>
+                <option value="">Seleccioná</option>
+                <option value="Lunes">Lunes</option>
+                <option value="Martes">Martes</option>
+                <option value="Miércoles">Miércoles</option>
+                <option value="Jueves">Jueves</option>
+                <option value="Viernes">Viernes</option>
+                <option value="Sábado">Sábado</option>
+                <option value="Domingo">Domingo</option>
+              </select>
+            </div>
+            <div class="modal-form-group">
+              <label for="turHora">Hora preferida *</label>
+              <input type="text" id="turHora" placeholder="Ej: 20:00" required />
+            </div>
+          </div>
+          <div class="site-modal-footer" style="padding:0;margin-top:8px">
+            <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center">
+              <span class="btn-icon">📅</span> Solicitar Turno Fijo
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TORNEO MODAL ========== -->
+  <div class="site-modal-overlay" id="torneoModal" onclick="closeSiteModal(event, 'torneoModal')">
+    <div class="site-modal" onclick="event.stopPropagation()">
+      <div class="site-modal-header">
+        <h3>🏆 Inscripción a Torneo</h3>
+        <button class="site-modal-close" onclick="closeSiteModal(null,'torneoModal')">&times;</button>
+      </div>
+      <div class="site-modal-body">
+        <form id="torneoForm" onsubmit="handleTorneoSubmit(event)">
+          <div class="modal-form-group">
+            <label for="torTorneo">Torneo *</label>
+            <select id="torTorneo" required>
+              <option value="Breakpoint Cup">🏆 Breakpoint Cup - Próxima edición</option>
+            </select>
+          </div>
+          <div class="modal-form-group">
+            <label for="torCategoria">Categoría *</label>
+            <select id="torCategoria" required>
+              <option value="">Seleccioná</option>
+              <option value="Inicial">Inicial</option>
+              <option value="Intermedio">Intermedio</option>
+              <option value="Avanzado">Avanzado</option>
+              <option value="Libre">Libre</option>
+            </select>
+          </div>
+          <div style="padding:12px 16px;background:rgba(0,229,160,0.06);border:1px solid rgba(0,229,160,0.15);border-radius:8px;margin-bottom:18px;font-size:0.85rem;color:var(--accent)">
+            👥 Datos de la pareja
+          </div>
+          <div class="modal-form-row">
+            <div class="modal-form-group">
+              <label for="torJ1Nombre">Jugador 1 - Nombre *</label>
+              <input type="text" id="torJ1Nombre" required />
+            </div>
+            <div class="modal-form-group">
+              <label for="torJ1Tel">Jugador 1 - Teléfono *</label>
+              <input type="tel" id="torJ1Tel" required />
+            </div>
+          </div>
+          <div class="modal-form-row">
+            <div class="modal-form-group">
+              <label for="torJ2Nombre">Jugador 2 - Nombre</label>
+              <input type="text" id="torJ2Nombre" />
+            </div>
+            <div class="modal-form-group">
+              <label for="torJ2Tel">Jugador 2 - Teléfono</label>
+              <input type="tel" id="torJ2Tel" />
+            </div>
+          </div>
+          <div class="site-modal-footer" style="padding:0;margin-top:8px">
+            <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center">
+              <span class="btn-icon">🏆</span> Inscribirme
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SUPABASE JS ========== -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <!-- ========== JAVASCRIPT ========== -->
   <script>
+    // ============================================================
+    // SUPABASE CONFIG
+    // ============================================================
+    const SUPABASE_URL = 'https://joojnfeficesvoupwmsw.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_KTnQH9EtdjwcvoB2GkEZlg_7cGcO5aS';
+    let sbClient = null;
+    try {
+      sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch(e) {
+      console.warn('Supabase not loaded, forms will use WhatsApp fallback');
+    }
+
+    // ============================================================
+    // TOAST NOTIFICATIONS
+    // ============================================================
+    function siteToast(message, type = 'info') {
+      const container = document.getElementById('siteToastContainer');
+      const toast = document.createElement('div');
+      toast.className = `site-toast ${type}`;
+      const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+      toast.innerHTML = `${icons[type] || 'ℹ️'} ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('removing');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // ============================================================
+    // MODAL HELPERS
+    // ============================================================
+    function openSiteModal(id) {
+      document.getElementById(id).classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSiteModal(e, id) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById(id).classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    // Close modals on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.site-modal-overlay.show').forEach(m => {
+          m.classList.remove('show');
+          document.body.style.overflow = '';
+        });
+      }
+    });
+
+    // ============================================================
+    // RESERVATION FORM
+    // ============================================================
+    // Set min date to today
+    const fechaInput = document.getElementById('resFecha');
+    if (fechaInput) {
+      const today = new Date().toISOString().split('T')[0];
+      fechaInput.setAttribute('min', today);
+      fechaInput.value = today;
+    }
+
+    async function handleReservaSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnReservaSubmit');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="btn-icon">⏳</span> Enviando...';
+
+      const reserva = {
+        nombre: document.getElementById('resNombre').value,
+        telefono: document.getElementById('resTelefono').value,
+        email: document.getElementById('resEmail').value || '',
+        sede: document.getElementById('resSede').value,
+        fecha: document.getElementById('resFecha').value,
+        hora: document.getElementById('resHora').value,
+        notas: document.getElementById('resNotas').value || '',
+        estado: 'pendiente'
+      };
+
+      let saved = false;
+      if (sbClient) {
+        const { error } = await sbClient.from('reservas').insert(reserva);
+        if (!error) saved = true;
+        else console.error('Supabase error:', error);
+      }
+
+      // Also open WhatsApp
+      const waText = encodeURIComponent(
+        `Hola! Quiero reservar una cancha en Breakpoint Pádel:\n` +
+        `📋 Nombre: ${reserva.nombre}\n` +
+        `📍 Sede: ${reserva.sede}\n` +
+        `📅 Fecha: ${reserva.fecha}\n` +
+        `🕐 Hora: ${reserva.hora}\n` +
+        (reserva.notas ? `📝 Notas: ${reserva.notas}` : '')
+      );
+
+      if (saved) {
+        siteToast('¡Reserva enviada correctamente! Te confirmamos por WhatsApp 🎾', 'success');
+      } else {
+        siteToast('Reserva enviada por WhatsApp', 'info');
+      }
+
+      closeSiteModal(null, 'reservaModal');
+      document.getElementById('reservaForm').reset();
+      if (fechaInput) fechaInput.value = new Date().toISOString().split('T')[0];
+
+      btn.disabled = false;
+      btn.innerHTML = '<span class="btn-icon">📲</span> Reservar Cancha';
+
+      window.open(`https://wa.me/5493513247898?text=${waText}`, '_blank');
+    }
+
+    // ============================================================
+    // TURNO FIJO FORM
+    // ============================================================
+    async function handleTurnoSubmit(e) {
+      e.preventDefault();
+
+      const turno = {
+        nombre: document.getElementById('turNombre').value,
+        telefono: document.getElementById('turTelefono').value,
+        sede: document.getElementById('turSede').value,
+        dia_semana: document.getElementById('turDia').value,
+        hora: document.getElementById('turHora').value,
+        estado: 'pendiente'
+      };
+
+      let saved = false;
+      if (sbClient) {
+        const { error } = await sbClient.from('turnos_fijos').insert(turno);
+        if (!error) saved = true;
+      }
+
+      const waText = encodeURIComponent(
+        `Hola! Quiero solicitar un turno fijo:\n` +
+        `📋 Nombre: ${turno.nombre}\n` +
+        `📍 Sede: ${turno.sede}\n` +
+        `📅 Día: ${turno.dia_semana}\n` +
+        `🕐 Hora: ${turno.hora}`
+      );
+
+      siteToast(saved ? '¡Solicitud de turno fijo enviada! ✓' : 'Solicitud enviada por WhatsApp', saved ? 'success' : 'info');
+      closeSiteModal(null, 'turnoModal');
+      document.getElementById('turnoForm').reset();
+      window.open(`https://wa.me/5493513247898?text=${waText}`, '_blank');
+    }
+
+    // ============================================================
+    // TORNEO INSCRIPTION FORM
+    // ============================================================
+    async function handleTorneoSubmit(e) {
+      e.preventDefault();
+
+      const inscripcion = {
+        torneo: document.getElementById('torTorneo').value,
+        categoria: document.getElementById('torCategoria').value,
+        jugador1_nombre: document.getElementById('torJ1Nombre').value,
+        jugador1_telefono: document.getElementById('torJ1Tel').value,
+        jugador2_nombre: document.getElementById('torJ2Nombre').value || '',
+        jugador2_telefono: document.getElementById('torJ2Tel').value || '',
+        estado: 'pendiente'
+      };
+
+      let saved = false;
+      if (sbClient) {
+        const { error } = await sbClient.from('inscripciones_torneos').insert(inscripcion);
+        if (!error) saved = true;
+      }
+
+      const waText = encodeURIComponent(
+        `Hola! Quiero inscribirme en un torneo:\n` +
+        `🏆 Torneo: ${inscripcion.torneo}\n` +
+        `📊 Categoría: ${inscripcion.categoria}\n` +
+        `👤 Jugador 1: ${inscripcion.jugador1_nombre} - ${inscripcion.jugador1_telefono}\n` +
+        (inscripcion.jugador2_nombre ? `👤 Jugador 2: ${inscripcion.jugador2_nombre} - ${inscripcion.jugador2_telefono}` : '')
+      );
+
+      siteToast(saved ? '¡Inscripción enviada correctamente! 🏆' : 'Inscripción enviada por WhatsApp', saved ? 'success' : 'info');
+      closeSiteModal(null, 'torneoModal');
+      document.getElementById('torneoForm').reset();
+      window.open(`https://wa.me/5493513247898?text=${waText}`, '_blank');
+    }
+
+    // ============================================================
+    // CONTACT FORM → Supabase + WhatsApp
+    // ============================================================
+    async function handleContactForm(e) {
+      e.preventDefault();
+      const name = document.getElementById('contactName').value;
+      const email = document.getElementById('contactEmail').value;
+      const message = document.getElementById('contactMessage').value;
+
+      // Save to Supabase
+      if (sbClient) {
+        await sbClient.from('mensajes_contacto').insert({
+          nombre: name,
+          email: email,
+          mensaje: message
+        });
+      }
+
+      siteToast('¡Mensaje enviado! Te respondemos pronto 💬', 'success');
+
+      const whatsappText = encodeURIComponent(
+        `Hola, soy ${name} (${email}). ${message}`
+      );
+      window.open(`https://wa.me/5493513247898?text=${whatsappText}`, '_blank');
+      document.getElementById('contactForm').reset();
+    }
+
+    // ============================================================
+    // WIRE UP RESERVATION BUTTONS
+    // ============================================================
+    function wireReservaButtons() {
+      // Hero "Reservá tu cancha"
+      const heroBtn = document.getElementById('heroReserva');
+      if (heroBtn) {
+        heroBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          openSiteModal('reservaModal');
+        });
+      }
+
+      // Nav CTA
+      const navCta = document.querySelector('.nav-cta');
+      if (navCta) {
+        navCta.addEventListener('click', (e) => {
+          e.preventDefault();
+          openSiteModal('reservaModal');
+        });
+      }
+
+      // Floating WhatsApp → Reservation
+      const floatWa = document.getElementById('floatingWhatsapp');
+      if (floatWa) {
+        floatWa.addEventListener('click', (e) => {
+          e.preventDefault();
+          openSiteModal('reservaModal');
+        });
+      }
+
+      // Service card: "Reservar ahora" link
+      document.querySelectorAll('.info-detail').forEach(link => {
+        const href = link.getAttribute('href') || '';
+        if (href.includes('reservar%20una%20cancha')) {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            openSiteModal('reservaModal');
+          });
+        }
+        if (href.includes('turnos%20fijos')) {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            openSiteModal('turnoModal');
+          });
+        }
+        if (href.includes('torneos')) {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            openSiteModal('torneoModal');
+          });
+        }
+      });
+
+      // Branch "Reservar" buttons
+      document.querySelectorAll('.branch-actions .btn-primary').forEach(btn => {
+        const href = btn.getAttribute('href') || '';
+        if (href.includes('wa.me') && href.includes('reservar')) {
+          const sede = href.includes('Malague') ? 'Malagueño' : href.includes('Higgins') ? "O'Higgins" : 'Epifanía';
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('resSede').value = sede;
+            openSiteModal('reservaModal');
+          });
+        }
+      });
+    }
+
+    // ============================================================
+    // ORIGINAL SITE FUNCTIONALITY
+    // ============================================================
+
     // ---- Navbar Scroll Effect ----
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
@@ -851,20 +1337,6 @@
 
     revealElements.forEach(el => revealObserver.observe(el));
 
-    // ---- Contact Form → WhatsApp ----
-    function handleContactForm(e) {
-      e.preventDefault();
-      const name = document.getElementById('contactName').value;
-      const email = document.getElementById('contactEmail').value;
-      const message = document.getElementById('contactMessage').value;
-
-      const whatsappText = encodeURIComponent(
-        `Hola, soy ${name} (${email}). ${message}`
-      );
-
-      window.open(`https://wa.me/5493513247898?text=${whatsappText}`, '_blank');
-    }
-
     // ---- Smooth scroll for CTA ----
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
@@ -872,10 +1344,9 @@
         if (target) {
           e.preventDefault();
           const targetPosition = target.getBoundingClientRect().top + window.scrollY;
-          // Compensate for navbar height and reduce top black space
-          const offset = 80; 
+          const offset = 80;
           window.scrollTo({
-            top: targetPosition - offset + 20, 
+            top: targetPosition - offset + 20,
             behavior: 'smooth'
           });
         }
@@ -887,7 +1358,6 @@
       const stats = document.querySelectorAll('.hero-stat-value');
       stats.forEach(stat => {
         const text = stat.textContent;
-        // Only animate pure numbers
         if (/^\d+$/.test(text.replace(/[+K⭐]/g, ''))) {
           const target = parseInt(text);
           let current = 0;
@@ -905,7 +1375,6 @@
       });
     }
 
-    // Trigger counter animation when hero is visible
     const heroObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -917,6 +1386,11 @@
 
     const heroStats = document.querySelector('.hero-stats');
     if (heroStats) heroObserver.observe(heroStats);
+
+    // ============================================================
+    // INIT - Wire up buttons after DOM ready
+    // ============================================================
+    wireReservaButtons();
   </script>
 
 </body>

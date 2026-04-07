@@ -1953,3 +1953,234 @@ ul {
     padding: 24px;
   }
 }
+
+/* ============================================
+   MODAL OVERLAYS (Public Site)
+   ============================================ */
+.site-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+  padding: 16px;
+}
+
+.site-modal-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.site-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  transform: scale(0.92) translateY(20px);
+  transition: transform 0.3s ease;
+  position: relative;
+}
+
+.site-modal-overlay.show .site-modal {
+  transform: scale(1) translateY(0);
+}
+
+.site-modal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--gradient-accent);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.site-modal-header {
+  padding: 28px 28px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.site-modal-header h3 {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.site-modal-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.site-modal-close:hover {
+  color: #ff4466;
+  border-color: #ff4466;
+  background: rgba(255,68,102,0.1);
+}
+
+.site-modal-body {
+  padding: 28px;
+}
+
+.site-modal-body .modal-form-group {
+  margin-bottom: 18px;
+}
+
+.site-modal-body .modal-form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.site-modal-body .modal-form-group input,
+.site-modal-body .modal-form-group select,
+.site-modal-body .modal-form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+  transition: var(--transition);
+  outline: none;
+}
+
+.site-modal-body .modal-form-group input:focus,
+.site-modal-body .modal-form-group select:focus,
+.site-modal-body .modal-form-group textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.site-modal-body .modal-form-group select option {
+  background: var(--bg-card);
+}
+
+.site-modal-body .modal-form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.site-modal-body .modal-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.site-modal-footer {
+  padding: 0 28px 28px;
+  display: flex;
+  gap: 12px;
+}
+
+.site-modal-footer .btn {
+  flex: 1;
+  justify-content: center;
+}
+
+/* ============================================
+   TOAST NOTIFICATIONS (Public Site)
+   ============================================ */
+.site-toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.site-toast {
+  pointer-events: auto;
+  padding: 16px 24px;
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  min-width: 300px;
+  max-width: 420px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: siteToastIn 0.4s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid;
+}
+
+.site-toast.success {
+  background: rgba(0, 229, 160, 0.12);
+  border-color: rgba(0, 229, 160, 0.4);
+  color: var(--accent);
+}
+
+.site-toast.error {
+  background: rgba(255, 68, 102, 0.12);
+  border-color: rgba(255, 68, 102, 0.4);
+  color: #ff4466;
+}
+
+.site-toast.info {
+  background: rgba(0, 180, 216, 0.12);
+  border-color: rgba(0, 180, 216, 0.4);
+  color: var(--accent-blue);
+}
+
+.site-toast.removing {
+  animation: siteToastOut 0.3s ease forwards;
+}
+
+@keyframes siteToastIn {
+  from { opacity: 0; transform: translateX(50px) scale(0.95); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes siteToastOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(50px); }
+}
+
+@media (max-width: 768px) {
+  .site-modal {
+    max-height: 90vh;
+  }
+
+  .site-modal-body .modal-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .site-toast-container {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+  }
+
+  .site-toast {
+    min-width: auto;
+    max-width: none;
+  }
+}

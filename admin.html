@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | Breakpoint Pádel</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="admin.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>" />
+</head>
+<body>
+
+  <!-- ===== TOAST CONTAINER ===== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ===== LOGIN SCREEN ===== -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-logo">BP</div>
+      <h1>Panel Admin</h1>
+      <p>Ingresá con tu cuenta para gestionar Breakpoint Pádel</p>
+      <form class="login-form" id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" placeholder="admin@breakpoint.com" required />
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Contraseña</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-login" id="btnLogin">Ingresar</button>
+        <div class="login-error" id="loginError"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== ADMIN LAYOUT ===== -->
+  <div class="admin-layout" id="adminLayout">
+
+    <!-- Mobile Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="toggleMobileSidebar()">☰</button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">BP</div>
+        <div>
+          <h2>Breakpoint</h2>
+          <span>Panel Admin</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-title">General</div>
+        <button class="sidebar-link active" onclick="switchSection('dashboard', this)">
+          <span class="icon">📊</span> Dashboard
+        </button>
+        <button class="sidebar-link" onclick="switchSection('reservas', this)">
+          <span class="icon">📋</span> Reservas
+          <span class="badge" id="badgeReservas" style="display:none">0</span>
+        </button>
+        <button class="sidebar-link" onclick="switchSection('mensajes', this)">
+          <span class="icon">📩</span> Mensajes
+          <span class="badge" id="badgeMensajes" style="display:none">0</span>
+        </button>
+        <button class="sidebar-link" onclick="switchSection('torneos', this)">
+          <span class="icon">🏆</span> Torneos
+        </button>
+        <button class="sidebar-link" onclick="switchSection('turnos', this)">
+          <span class="icon">📅</span> Turnos Fijos
+        </button>
+
+        <div class="sidebar-section-title">Contenido</div>
+        <button class="sidebar-link" onclick="switchSection('galeria', this)">
+          <span class="icon">📸</span> Galería
+        </button>
+        <button class="sidebar-link" onclick="switchSection('menu', this)">
+          <span class="icon">🍔</span> Menú Nomade
+        </button>
+        <button class="sidebar-link" onclick="switchSection('contenido', this)">
+          <span class="icon">✏️</span> Contenido Web
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="handleLogout()">
+          <span>🚪</span> Cerrar Sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="main-header">
+        <h1 id="sectionTitle">Dashboard</h1>
+        <div class="header-actions">
+          <span style="font-size:13px;color:var(--text-muted)" id="adminEmail"></span>
+        </div>
+      </header>
+
+      <div class="main-body">
+
+        <!-- ===== DASHBOARD ===== -->
+        <div class="admin-section active" id="sec-dashboard">
+          <div class="stats-grid" id="statsGrid">
+            <div class="stat-card accent">
+              <div class="stat-icon">📋</div>
+              <div class="stat-value" id="statReservas">-</div>
+              <div class="stat-label">Reservas pendientes</div>
+            </div>
+            <div class="stat-card warning">
+              <div class="stat-icon">📩</div>
+              <div class="stat-value" id="statMensajes">-</div>
+              <div class="stat-label">Mensajes sin leer</div>
+            </div>
+            <div class="stat-card info">
+              <div class="stat-icon">🏆</div>
+              <div class="stat-value" id="statTorneos">-</div>
+              <div class="stat-label">Inscripciones torneos</div>
+            </div>
+            <div class="stat-card danger">
+              <div class="stat-icon">📅</div>
+              <div class="stat-value" id="statTurnos">-</div>
+              <div class="stat-label">Solicitudes turnos fijos</div>
+            </div>
+          </div>
+
+          <!-- Recent activity -->
+          <div class="data-panel">
+            <div class="data-panel-header">
+              <h3>📋 Últimas Reservas</h3>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="data-table" id="dashReservasTable">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Sede</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="dashReservasBody">
+                  <tr><td colspan="5" class="loading-spinner"><div class="spinner"></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== RESERVAS ===== -->
+        <div class="admin-section" id="sec-reservas">
+          <div class="data-panel">
+            <div class="data-panel-header">
+              <h3>📋 Todas las Reservas</h3>
+              <div class="data-panel-actions">
+                <div class="filter-bar">
+                  <select id="filterReservaSede" onchange="loadReservas()">
+                    <option value="">Todas las sedes</option>
+                    <option value="Malagueño">Malagueño</option>
+                    <option value="O'Higgins">O'Higgins</option>
+                    <option value="Epifanía">Epifanía</option>
+                  </select>
+                  <select id="filterReservaEstado" onchange="loadReservas()">
+                    <option value="">Todos los estados</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="confirmada">Confirmada</option>
+                    <option value="cancelada">Cancelada</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Sede</th>
+                    <th>Hora</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="reservasBody">
+                  <tr><td colspan="7" class="loading-spinner"><div class="spinner"></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== MENSAJES ===== -->
+        <div class="admin-section" id="sec-mensajes">
+          <div class="data-panel">
+            <div class="data-panel-header">
+              <h3>📩 Mensajes de Contacto</h3>
+              <div class="data-panel-actions">
+                <div class="filter-bar">
+                  <select id="filterMensajeLeido" onchange="loadMensajes()">
+                    <option value="">Todos</option>
+                    <option value="false">No leídos</option>
+                    <option value="true">Leídos</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Mensaje</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="mensajesBody">
+                  <tr><td colspan="6" class="loading-spinner"><div class="spinner"></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== TORNEOS ===== -->
+        <div class="admin-section" id="sec-torneos">
+          <div class="data-panel">
+            <div class="data-panel-header">
+              <h3>🏆 Inscripciones a Torneos</h3>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Jugador 1</th>
+                    <th>Jugador 2</th>
+                    <th>Categoría</th>
+                    <th>Torneo</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="torneosBody">
+                  <tr><td colspan="7" class="loading-spinner"><div class="spinner"></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== TURNOS FIJOS ===== -->
+        <div class="admin-section" id="sec-turnos">
+          <div class="data-panel">
+            <div class="data-panel-header">
+              <h3>📅 Solicitudes de Turnos Fijos</h3>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Sede</th>
+                    <th>Día</th>
+                    <th>Hora</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="turnosBody">
+                  <tr><td colspan="8" class="loading-spinner"><div class="spinner"></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== GALERÍA ===== -->
+        <div class="admin-section" id="sec-galeria">
+          <div class="data-panel">
+            <div class="data-panel-header">
+              <h3>📸 Galería de Imágenes</h3>
+              <div class="data-panel-actions">
+                <button class="btn btn-primary" onclick="openUploadModal()">
+                  <span>➕</span> Subir Imagen
+                </button>
+              </div>
+            </div>
+            <div class="gallery-admin-grid" id="galleryGrid">
+              <div class="loading-spinner"><div class="spinner"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== MENÚ NOMADE ===== -->
+        <div class="admin-section" id="sec-menu">
+          <div class="data-panel">
+            <div class="data-panel-header">
+              <h3>🍔 Menú Nomade Bar</h3>
+              <div class="data-panel-actions">
+                <div class="tab-pills" id="menuCategoryTabs">
+                  <button class="tab-pill active" onclick="filterMenuCategory('', this)">Todos</button>
+                  <button class="tab-pill" onclick="filterMenuCategory('hamburguesas', this)">🍔 Hamburguesas</button>
+                  <button class="tab-pill" onclick="filterMenuCategory('tragos', this)">🍹 Tragos</button>
+                  <button class="tab-pill" onclick="filterMenuCategory('cervezas', this)">🍺 Cervezas</button>
+                  <button class="tab-pill" onclick="filterMenuCategory('picadas', this)">🧆 Picadas</button>
+                </div>
+                <button class="btn btn-primary" onclick="openMenuItemModal()">
+                  <span>➕</span> Agregar Item
+                </button>
+              </div>
+            </div>
+            <div class="menu-admin-grid" id="menuGrid">
+              <div class="loading-spinner"><div class="spinner"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== CONTENIDO WEB ===== -->
+        <div class="admin-section" id="sec-contenido">
+          <div class="data-panel">
+            <div class="data-panel-header">
+              <h3>✏️ Editar Contenido del Sitio</h3>
+              <div class="data-panel-actions">
+                <button class="btn btn-primary" onclick="saveAllContent()">
+                  <span>💾</span> Guardar Todo
+                </button>
+              </div>
+            </div>
+            <div class="content-editor-grid" id="contentGrid">
+              <div class="loading-spinner"><div class="spinner"></div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== MODAL: Generic ===== -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="modalTitle">Modal</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer" id="modalFooter"></div>
+    </div>
+  </div>
+
+  <!-- ===== SUPABASE JS ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    // ============================================================
+    // SUPABASE CONFIG
+    // ============================================================
+    const SUPABASE_URL = 'https://joojnfeficesvoupwmsw.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_KTnQH9EtdjwcvoB2GkEZlg_7cGcO5aS';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ============================================================
+    // AUTH
+    // ============================================================
+    let currentUser = null;
+
+    async function checkSession() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        currentUser = session.user;
+        showAdmin();
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('btnLogin');
+      const errorEl = document.getElementById('loginError');
+
+      btn.disabled = true;
+      btn.textContent = 'Ingresando...';
+      errorEl.classList.remove('show');
+
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        errorEl.textContent = 'Email o contraseña incorrectos';
+        errorEl.classList.add('show');
+        btn.disabled = false;
+        btn.textContent = 'Ingresar';
+        return;
+      }
+
+      currentUser = data.user;
+      showAdmin();
+    }
+
+    async function handleLogout() {
+      await sb.auth.signOut();
+      currentUser = null;
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('adminLayout').classList.remove('visible');
+    }
+
+    function showAdmin() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('adminLayout').classList.add('visible');
+      document.getElementById('adminEmail').textContent = currentUser?.email || '';
+      loadDashboard();
+    }
+
+    // ============================================================
+    // NAVIGATION
+    // ============================================================
+    const sectionTitles = {
+      dashboard: '📊 Dashboard',
+      reservas: '📋 Reservas',
+      mensajes: '📩 Mensajes',
+      torneos: '🏆 Torneos',
+      turnos: '📅 Turnos Fijos',
+      galeria: '📸 Galería',
+      menu: '🍔 Menú Nomade',
+      contenido: '✏️ Contenido Web'
+    };
+
+    function switchSection(name, btnEl) {
+      // Hide all sections
+      document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+
+      // Show target
+      document.getElementById('sec-' + name).classList.add('active');
+      if (btnEl) btnEl.classList.add('active');
+      document.getElementById('sectionTitle').textContent = sectionTitles[name] || name;
+
+      // Load data
+      const loaders = {
+        dashboard: loadDashboard,
+        reservas: loadReservas,
+        mensajes: loadMensajes,
+        torneos: loadTorneos,
+        turnos: loadTurnos,
+        galeria: loadGallery,
+        menu: loadMenu,
+        contenido: loadContent
+      };
+      if (loaders[name]) loaders[name]();
+
+      // Close mobile sidebar
+      document.getElementById('sidebar').classList.remove('mobile-open');
+    }
+
+    function toggleMobileSidebar() {
+      document.getElementById('sidebar').classList.toggle('mobile-open');
+    }
+
+    // ============================================================
+    // DASHBOARD
+    // ============================================================
+    async function loadDashboard() {
+      // Stats
+      const [resData, msgData, torData, turData] = await Promise.all([
+        sb.from('reservas').select('id', { count: 'exact' }).eq('estado', 'pendiente'),
+        sb.from('mensajes_contacto').select('id', { count: 'exact' }).eq('leido', false),
+        sb.from('inscripciones_torneos').select('id', { count: 'exact' }).eq('estado', 'pendiente'),
+        sb.from('turnos_fijos').select('id', { count: 'exact' }).eq('estado', 'pendiente')
+      ]);
+
+      document.getElementById('statReservas').textContent = resData.count || 0;
+      document.getElementById('statMensajes').textContent = msgData.count || 0;
+      document.getElementById('statTorneos').textContent = torData.count || 0;
+      document.getElementById('statTurnos').textContent = turData.count || 0;
+
+      // Badges
+      updateBadge('badgeReservas', resData.count);
+      updateBadge('badgeMensajes', msgData.count);
+
+      // Recent reservas
+      const { data: recentRes } = await sb.from('reservas')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      const tbody = document.getElementById('dashReservasBody');
+      if (!recentRes || recentRes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="empty-icon">📋</div><h4>Sin reservas aún</h4></td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = recentRes.map(r => `
+        <tr>
+          <td>${r.nombre}</td>
+          <td>${r.sede}</td>
+          <td>${formatDate(r.fecha)}</td>
+          <td>${r.hora}</td>
+          <td><span class="status-badge ${r.estado}">${r.estado}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function updateBadge(id, count) {
+      const el = document.getElementById(id);
+      if (count > 0) {
+        el.textContent = count;
+        el.style.display = 'inline';
+      } else {
+        el.style.display = 'none';
+      }
+    }
+
+    // ============================================================
+    // RESERVAS
+    // ============================================================
+    async function loadReservas() {
+      const sede = document.getElementById('filterReservaSede').value;
+      const estado = document.getElementById('filterReservaEstado').value;
+
+      let query = sb.from('reservas').select('*').order('created_at', { ascending: false });
+      if (sede) query = query.eq('sede', sede);
+      if (estado) query = query.eq('estado', estado);
+
+      const { data, error } = await query;
+      const tbody = document.getElementById('reservasBody');
+
+      if (error || !data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">📋</div><h4>No hay reservas</h4></td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.map(r => `
+        <tr>
+          <td>${formatDate(r.fecha)}</td>
+          <td><strong>${r.nombre}</strong></td>
+          <td><a href="tel:${r.telefono}" style="color:var(--accent)">${r.telefono}</a></td>
+          <td>${r.sede}</td>
+          <td>${r.hora}</td>
+          <td><span class="status-badge ${r.estado}">${r.estado}</span></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              ${r.estado === 'pendiente' ? `
+                <button class="btn btn-sm btn-primary" onclick="updateReservaEstado('${r.id}','confirmada')">✓</button>
+                <button class="btn btn-sm btn-danger" onclick="updateReservaEstado('${r.id}','cancelada')">✗</button>
+              ` : `
+                <button class="btn btn-sm btn-secondary" onclick="updateReservaEstado('${r.id}','pendiente')">↩</button>
+              `}
+              <button class="btn btn-sm btn-danger" onclick="deleteRecord('reservas','${r.id}', loadReservas)">🗑</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function updateReservaEstado(id, estado) {
+      const { error } = await sb.from('reservas').update({ estado }).eq('id', id);
+      if (error) { showToast('Error al actualizar', 'error'); return; }
+      showToast(`Reserva ${estado}`, 'success');
+      loadReservas();
+      loadDashboard();
+    }
+
+    // ============================================================
+    // MENSAJES
+    // ============================================================
+    async function loadMensajes() {
+      const leido = document.getElementById('filterMensajeLeido').value;
+
+      let query = sb.from('mensajes_contacto').select('*').order('created_at', { ascending: false });
+      if (leido !== '') query = query.eq('leido', leido === 'true');
+
+      const { data, error } = await query;
+      const tbody = document.getElementById('mensajesBody');
+
+      if (error || !data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="empty-icon">📩</div><h4>No hay mensajes</h4></td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.map(m => `
+        <tr style="${!m.leido ? 'background:var(--accent-glow)' : ''}">
+          <td>${formatDateTime(m.created_at)}</td>
+          <td><strong>${m.nombre}</strong></td>
+          <td><a href="mailto:${m.email}" style="color:var(--accent)">${m.email}</a></td>
+          <td class="message-preview" title="${escapeHtml(m.mensaje)}">${escapeHtml(m.mensaje)}</td>
+          <td><span class="status-badge ${m.leido ? 'leido' : 'no-leido'}">${m.leido ? 'Leído' : 'Nuevo'}</span></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-sm btn-secondary" onclick="viewMessage('${m.id}')">👁</button>
+              ${!m.leido ? `<button class="btn btn-sm btn-primary" onclick="markAsRead('${m.id}')">✓</button>` : ''}
+              <button class="btn btn-sm btn-danger" onclick="deleteRecord('mensajes_contacto','${m.id}', loadMensajes)">🗑</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function viewMessage(id) {
+      const { data } = await sb.from('mensajes_contacto').select('*').eq('id', id).single();
+      if (!data) return;
+
+      // Mark as read
+      if (!data.leido) {
+        await sb.from('mensajes_contacto').update({ leido: true }).eq('id', id);
+      }
+
+      openModal('📩 Mensaje de ' + data.nombre, `
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px">De:</div>
+          <div style="font-size:15px"><strong>${data.nombre}</strong> — <a href="mailto:${data.email}" style="color:var(--accent)">${data.email}</a></div>
+        </div>
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px">Fecha:</div>
+          <div style="font-size:14px">${formatDateTime(data.created_at)}</div>
+        </div>
+        <div>
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px">Mensaje:</div>
+          <div class="message-full" style="background:var(--bg-input);padding:16px;border-radius:8px">${escapeHtml(data.mensaje)}</div>
+        </div>
+      `, `
+        <a href="https://wa.me/${data.email.includes('@') ? '' : data.email}?text=${encodeURIComponent('Hola ' + data.nombre + ', te respondemos desde Breakpoint Pádel:')}" target="_blank" class="btn btn-primary">💬 Responder por WhatsApp</a>
+        <button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>
+      `);
+
+      loadMensajes();
+      loadDashboard();
+    }
+
+    async function markAsRead(id) {
+      await sb.from('mensajes_contacto').update({ leido: true }).eq('id', id);
+      showToast('Mensaje marcado como leído', 'success');
+      loadMensajes();
+      loadDashboard();
+    }
+
+    // ============================================================
+    // TORNEOS
+    // ============================================================
+    async function loadTorneos() {
+      const { data } = await sb.from('inscripciones_torneos').select('*').order('created_at', { ascending: false });
+      const tbody = document.getElementById('torneosBody');
+
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">🏆</div><h4>No hay inscripciones</h4></td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.map(t => `
+        <tr>
+          <td>${formatDateTime(t.created_at)}</td>
+          <td><strong>${t.jugador1_nombre}</strong><br><small style="color:var(--text-muted)">${t.jugador1_telefono}</small></td>
+          <td>${t.jugador2_nombre || '-'}<br><small style="color:var(--text-muted)">${t.jugador2_telefono || ''}</small></td>
+          <td>${t.categoria}</td>
+          <td>${t.torneo}</td>
+          <td><span class="status-badge ${t.estado}">${t.estado}</span></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              ${t.estado === 'pendiente' ? `
+                <button class="btn btn-sm btn-primary" onclick="updateTorneoEstado('${t.id}','confirmada')">✓</button>
+                <button class="btn btn-sm btn-danger" onclick="updateTorneoEstado('${t.id}','cancelada')">✗</button>
+              ` : ''}
+              <button class="btn btn-sm btn-danger" onclick="deleteRecord('inscripciones_torneos','${t.id}', loadTorneos)">🗑</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function updateTorneoEstado(id, estado) {
+      await sb.from('inscripciones_torneos').update({ estado }).eq('id', id);
+      showToast(`Inscripción ${estado}`, 'success');
+      loadTorneos();
+    }
+
+    // ============================================================
+    // TURNOS FIJOS
+    // ============================================================
+    async function loadTurnos() {
+      const { data } = await sb.from('turnos_fijos').select('*').order('created_at', { ascending: false });
+      const tbody = document.getElementById('turnosBody');
+
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><div class="empty-icon">📅</div><h4>No hay solicitudes</h4></td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.map(t => `
+        <tr>
+          <td>${formatDateTime(t.created_at)}</td>
+          <td><strong>${t.nombre}</strong></td>
+          <td><a href="tel:${t.telefono}" style="color:var(--accent)">${t.telefono}</a></td>
+          <td>${t.sede}</td>
+          <td>${t.dia_semana}</td>
+          <td>${t.hora}</td>
+          <td><span class="status-badge ${t.estado}">${t.estado}</span></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              ${t.estado === 'pendiente' ? `
+                <button class="btn btn-sm btn-primary" onclick="updateTurnoEstado('${t.id}','confirmada')">✓</button>
+                <button class="btn btn-sm btn-danger" onclick="updateTurnoEstado('${t.id}','cancelada')">✗</button>
+              ` : ''}
+              <button class="btn btn-sm btn-danger" onclick="deleteRecord('turnos_fijos','${t.id}', loadTurnos)">🗑</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function updateTurnoEstado(id, estado) {
+      await sb.from('turnos_fijos').update({ estado }).eq('id', id);
+      showToast(`Turno ${estado}`, 'success');
+      loadTurnos();
+    }
+
+    // ============================================================
+    // GALERÍA
+    // ============================================================
+    async function loadGallery() {
+      const { data } = await sb.from('gallery_images').select('*').order('display_order');
+      const grid = document.getElementById('galleryGrid');
+
+      let html = `
+        <div class="gallery-upload-zone" onclick="document.getElementById('galleryFileInput').click()">
+          <div class="upload-icon">➕</div>
+          <span>Subir imagen</span>
+          <input type="file" id="galleryFileInput" accept="image/*" style="display:none" onchange="handleGalleryUpload(event)" />
+        </div>
+      `;
+
+      if (data && data.length > 0) {
+        html += data.map(img => `
+          <div class="gallery-admin-item">
+            <img src="${img.url}" alt="${img.title || 'Imagen'}" loading="lazy" />
+            <div class="item-title">${img.title || 'Sin título'}</div>
+            <div class="item-overlay">
+              <button class="btn btn-sm btn-secondary" onclick="editGalleryItem('${img.id}','${escapeHtml(img.title || '')}')">✏️ Editar</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteGalleryItem('${img.id}','${img.storage_path || ''}')">🗑 Eliminar</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      grid.innerHTML = html;
+    }
+
+    async function handleGalleryUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      showToast('Subiendo imagen...', 'info');
+
+      const fileName = `gallery/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await sb.storage
+        .from('gallery')
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+      if (uploadError) {
+        showToast('Error al subir: ' + uploadError.message, 'error');
+        return;
+      }
+
+      // Get public URL
+      const { data: urlData } = sb.storage.from('gallery').getPublicUrl(fileName);
+
+      // Save to DB
+      const { error: dbError } = await sb.from('gallery_images').insert({
+        url: urlData.publicUrl,
+        storage_path: fileName,
+        title: file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ')
+      });
+
+      if (dbError) {
+        showToast('Error al guardar: ' + dbError.message, 'error');
+        return;
+      }
+
+      showToast('Imagen subida correctamente ✓', 'success');
+      loadGallery();
+      e.target.value = '';
+    }
+
+    function editGalleryItem(id, currentTitle) {
+      openModal('✏️ Editar Imagen', `
+        <div class="form-group">
+          <label>Título / Descripción</label>
+          <input type="text" id="editGalleryTitle" value="${currentTitle}" placeholder="Ej: Cancha indoor nocturna" />
+        </div>
+      `, `
+        <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveGalleryTitle('${id}')">💾 Guardar</button>
+      `);
+    }
+
+    async function saveGalleryTitle(id) {
+      const title = document.getElementById('editGalleryTitle').value;
+      await sb.from('gallery_images').update({ title }).eq('id', id);
+      showToast('Título actualizado', 'success');
+      closeModal();
+      loadGallery();
+    }
+
+    async function deleteGalleryItem(id, storagePath) {
+      openModal('🗑 Eliminar Imagen', `
+        <div class="confirm-dialog">
+          <div class="confirm-icon">⚠️</div>
+          <p>¿Seguro que querés eliminar esta imagen? Esta acción no se puede deshacer.</p>
+          <div class="confirm-actions">
+            <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+            <button class="btn btn-danger" onclick="confirmDeleteGallery('${id}','${storagePath}')">🗑 Eliminar</button>
+          </div>
+        </div>
+      `);
+    }
+
+    async function confirmDeleteGallery(id, storagePath) {
+      // Delete from storage
+      if (storagePath) {
+        await sb.storage.from('gallery').remove([storagePath]);
+      }
+      // Delete from DB
+      await sb.from('gallery_images').delete().eq('id', id);
+      showToast('Imagen eliminada', 'success');
+      closeModal();
+      loadGallery();
+    }
+
+    // ============================================================
+    // MENÚ NOMADE
+    // ============================================================
+    let currentMenuFilter = '';
+
+    async function loadMenu() {
+      let query = sb.from('menu_items').select('*').order('category').order('display_order');
+      if (currentMenuFilter) query = query.eq('category', currentMenuFilter);
+
+      const { data } = await query;
+      const grid = document.getElementById('menuGrid');
+
+      if (!data || data.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🍔</div><h4>No hay items en el menú</h4><p>Agregá items al menú de Nomade Bar</p></div>';
+        return;
+      }
+
+      grid.innerHTML = data.map(item => `
+        <div class="menu-admin-card ${!item.available ? 'unavailable' : ''}">
+          <div class="menu-card-header">
+            <span class="menu-emoji">${item.emoji}</span>
+            <div>
+              <h4>${item.name}</h4>
+              <small style="color:var(--text-muted);text-transform:capitalize">${item.category}</small>
+            </div>
+          </div>
+          <div class="menu-desc">${item.description || 'Sin descripción'}</div>
+          ${item.price ? `<div class="menu-price">$${Number(item.price).toLocaleString()}</div>` : ''}
+          ${!item.available ? '<div style="color:var(--danger);font-size:12px;font-weight:600;margin-top:4px">⊘ No disponible</div>' : ''}
+          <div class="menu-card-actions">
+            <button class="btn btn-sm btn-secondary" onclick='editMenuItem(${JSON.stringify(item).replace(/'/g, "\\'")})'>✏️ Editar</button>
+            <button class="btn btn-sm ${item.available ? 'btn-danger' : 'btn-primary'}" onclick="toggleMenuAvailability('${item.id}', ${!item.available})">
+              ${item.available ? '⊘ Desactivar' : '✓ Activar'}
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="deleteRecord('menu_items','${item.id}', loadMenu)">🗑</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterMenuCategory(cat, btn) {
+      currentMenuFilter = cat;
+      document.querySelectorAll('#menuCategoryTabs .tab-pill').forEach(p => p.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      loadMenu();
+    }
+
+    function openMenuItemModal(item = null) {
+      const isEdit = !!item;
+      openModal(isEdit ? '✏️ Editar Item' : '➕ Nuevo Item', `
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" id="menuItemName" value="${item?.name || ''}" placeholder="Ej: Crispy Chicken" required />
+          </div>
+          <div class="form-group">
+            <label>Emoji</label>
+            <input type="text" id="menuItemEmoji" value="${item?.emoji || '🍽️'}" placeholder="🍔" style="max-width:80px" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Categoría</label>
+            <select id="menuItemCategory">
+              <option value="hamburguesas" ${item?.category === 'hamburguesas' ? 'selected' : ''}>🍔 Hamburguesas & Sándwiches</option>
+              <option value="tragos" ${item?.category === 'tragos' ? 'selected' : ''}>🍹 Tragos de Autor</option>
+              <option value="cervezas" ${item?.category === 'cervezas' ? 'selected' : ''}>🍺 Cervezas</option>
+              <option value="picadas" ${item?.category === 'picadas' ? 'selected' : ''}>🧆 Picadas & Snacks</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Precio ($)</label>
+            <input type="number" id="menuItemPrice" value="${item?.price || ''}" placeholder="0.00" step="0.01" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="menuItemDesc" placeholder="Breve descripción del plato...">${item?.description || ''}</textarea>
+        </div>
+      `, `
+        <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveMenuItem('${item?.id || ''}')">${isEdit ? '💾 Guardar' : '➕ Agregar'}</button>
+      `);
+    }
+
+    function editMenuItem(item) {
+      openMenuItemModal(item);
+    }
+
+    async function saveMenuItem(id) {
+      const itemData = {
+        name: document.getElementById('menuItemName').value,
+        emoji: document.getElementById('menuItemEmoji').value,
+        category: document.getElementById('menuItemCategory').value,
+        price: document.getElementById('menuItemPrice').value || null,
+        description: document.getElementById('menuItemDesc').value
+      };
+
+      if (!itemData.name) { showToast('El nombre es obligatorio', 'error'); return; }
+
+      let error;
+      if (id) {
+        ({ error } = await sb.from('menu_items').update(itemData).eq('id', id));
+      } else {
+        ({ error } = await sb.from('menu_items').insert(itemData));
+      }
+
+      if (error) { showToast('Error: ' + error.message, 'error'); return; }
+      showToast(id ? 'Item actualizado' : 'Item agregado', 'success');
+      closeModal();
+      loadMenu();
+    }
+
+    async function toggleMenuAvailability(id, available) {
+      await sb.from('menu_items').update({ available }).eq('id', id);
+      showToast(available ? 'Item activado' : 'Item desactivado', 'success');
+      loadMenu();
+    }
+
+    // ============================================================
+    // CONTENIDO WEB
+    // ============================================================
+    const contentLabels = {
+      hero_title: '🏠 Título Hero',
+      hero_subtitle: '🏠 Subtítulo Hero',
+      about_title: '📝 Título Nosotros',
+      about_text_1: '📝 Texto Nosotros (Párrafo 1)',
+      about_text_2: '📝 Texto Nosotros (Párrafo 2)',
+      whatsapp_number: '📱 Número WhatsApp',
+      instagram_handle: '📸 Instagram (sin @)',
+      nomade_instagram: '📸 Instagram Nomade (sin @)'
+    };
+
+    async function loadContent() {
+      const { data } = await sb.from('site_content').select('*').order('id');
+      const grid = document.getElementById('contentGrid');
+
+      if (!data || data.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">✏️</div><h4>No hay contenido editable</h4><p>Ejecutá el script SQL primero para crear el contenido inicial.</p></div>';
+        return;
+      }
+
+      grid.innerHTML = data.map(item => `
+        <div class="content-editor-card">
+          <label>${contentLabels[item.id] || item.id}</label>
+          ${item.content.length > 80
+            ? `<textarea data-content-id="${item.id}" rows="3">${escapeHtml(item.content)}</textarea>`
+            : `<input type="text" data-content-id="${item.id}" value="${escapeHtml(item.content)}" />`
+          }
+          <div class="save-indicator" id="saved-${item.id}">✓ Guardado</div>
+        </div>
+      `).join('');
+    }
+
+    async function saveAllContent() {
+      const inputs = document.querySelectorAll('[data-content-id]');
+      let count = 0;
+
+      for (const input of inputs) {
+        const id = input.dataset.contentId;
+        const content = input.value;
+        const { error } = await sb.from('site_content').update({ content, updated_at: new Date().toISOString() }).eq('id', id);
+        if (!error) {
+          count++;
+          const indicator = document.getElementById('saved-' + id);
+          if (indicator) {
+            indicator.classList.add('show');
+            setTimeout(() => indicator.classList.remove('show'), 2000);
+          }
+        }
+      }
+
+      showToast(`${count} campos actualizados correctamente`, 'success');
+    }
+
+    // ============================================================
+    // GENERIC HELPERS
+    // ============================================================
+    async function deleteRecord(table, id, reloadFn) {
+      openModal('🗑 Confirmar eliminación', `
+        <div class="confirm-dialog">
+          <div class="confirm-icon">⚠️</div>
+          <p>¿Seguro que querés eliminar este registro? Esta acción no se puede deshacer.</p>
+          <div class="confirm-actions">
+            <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+            <button class="btn btn-danger" onclick="confirmDelete('${table}','${id}')">🗑 Eliminar</button>
+          </div>
+        </div>
+      `);
+      window._pendingDeleteReload = reloadFn;
+    }
+
+    async function confirmDelete(table, id) {
+      await sb.from(table).delete().eq('id', id);
+      showToast('Registro eliminado', 'success');
+      closeModal();
+      if (window._pendingDeleteReload) window._pendingDeleteReload();
+    }
+
+    // ============================================================
+    // MODAL
+    // ============================================================
+    function openModal(title, bodyHtml, footerHtml = '') {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalBody').innerHTML = bodyHtml;
+      document.getElementById('modalFooter').innerHTML = footerHtml;
+      document.getElementById('modalOverlay').classList.add('show');
+    }
+
+    function closeModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('modalOverlay').classList.remove('show');
+    }
+
+    // ============================================================
+    // TOAST
+    // ============================================================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      const icons = { success: '✓', error: '✗', info: 'ℹ' };
+      toast.innerHTML = `<span>${icons[type] || 'ℹ'}</span> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('removing');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // ============================================================
+    // UTILS
+    // ============================================================
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function formatDateTime(dateStr) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function openUploadModal() {
+      document.getElementById('galleryFileInput')?.click();
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    checkSession();
+
+    // Listen for auth state changes
+    sb.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('adminLayout').classList.remove('visible');
+      }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+  </script>
+
+</body>
+</html>
