@@ -25,7 +25,7 @@
         <span>BREAKPOINT</span>
       </a>
       <div class="nav-links" id="navLinks">
-        <a href="admin.html" style="color:var(--accent); font-weight:700;">Admin 🔐</a>
+
         <a href="#about">Nosotros</a>
         <a href="#services">Servicios</a>
         <a href="#reviews">Reseñas</a>
@@ -786,6 +786,7 @@
       </div>
       <div class="footer-bottom">
         <span>© 2026 Breakpoint Pádel. Todos los derechos reservados.</span>
+        <a href="admin.html" style="color:var(--text-muted);font-size:12px;text-decoration:none;opacity:0.5;transition:opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">⚙️ Admin</a>
         <span>Hecho con 🎾 en Córdoba, Argentina</span>
       </div>
     </div>
@@ -840,35 +841,37 @@
               <label for="resFecha">Fecha *</label>
               <input type="date" id="resFecha" onchange="updateAvailableHours()" required />
             </div>
-            <div class="modal-form-group">
-              <label for="resHora">Hora *</label>
-              <select id="resHora" required>
-                <option value="">Seleccioná hora</option>
-                <option value="10:00">10:00</option>
-                <option value="11:00">11:00</option>
-                <option value="12:00">12:00</option>
-                <option value="13:00">13:00</option>
-                <option value="14:00">14:00</option>
-                <option value="15:00">15:00</option>
-                <option value="16:00">16:00</option>
-                <option value="17:00">17:00</option>
-                <option value="17:30">17:30</option>
-                <option value="18:00">18:00</option>
-                <option value="18:30">18:30</option>
-                <option value="19:00">19:00</option>
-                <option value="19:30">19:30</option>
-                <option value="20:00">20:00</option>
-                <option value="20:30">20:30</option>
-                <option value="21:00">21:00</option>
-                <option value="21:30">21:30</option>
-                <option value="22:00">22:00</option>
-                <option value="22:30">22:30</option>
-                <option value="23:00">23:00</option>
-                <option value="23:30">23:30</option>
-                <option value="00:00">00:00</option>
-                <option value="00:30">00:30</option>
-                <option value="01:00">01:00</option>
-              </select>
+            <div class="modal-form-group" id="groupHora">
+              <label>Hora *</label>
+              <input type="hidden" id="resHora" />
+              
+              <div class="time-grid-label">Mañana</div>
+              <div class="time-grid">
+                <button type="button" class="time-btn" data-time="10:00" onclick="selectTime(this, '10:00')">10:00</button>
+                <button type="button" class="time-btn" data-time="11:00" onclick="selectTime(this, '11:00')">11:00</button>
+                <button type="button" class="time-btn" data-time="12:00" onclick="selectTime(this, '12:00')">12:00</button>
+              </div>
+
+              <div class="time-grid-label">Tarde</div>
+              <div class="time-grid">
+                <button type="button" class="time-btn" data-time="13:00" onclick="selectTime(this, '13:00')">13:00</button>
+                <button type="button" class="time-btn" data-time="14:00" onclick="selectTime(this, '14:00')">14:00</button>
+                <button type="button" class="time-btn" data-time="15:00" onclick="selectTime(this, '15:00')">15:00</button>
+                <button type="button" class="time-btn" data-time="16:00" onclick="selectTime(this, '16:00')">16:00</button>
+                <button type="button" class="time-btn" data-time="17:00" onclick="selectTime(this, '17:00')">17:00</button>
+                <button type="button" class="time-btn" data-time="18:00" onclick="selectTime(this, '18:00')">18:00</button>
+              </div>
+
+              <div class="time-grid-label">Noche</div>
+              <div class="time-grid">
+                <button type="button" class="time-btn" data-time="19:00" onclick="selectTime(this, '19:00')">19:00</button>
+                <button type="button" class="time-btn" data-time="20:00" onclick="selectTime(this, '20:00')">20:00</button>
+                <button type="button" class="time-btn" data-time="21:00" onclick="selectTime(this, '21:00')">21:00</button>
+                <button type="button" class="time-btn" data-time="22:00" onclick="selectTime(this, '22:00')">22:00</button>
+                <button type="button" class="time-btn" data-time="23:00" onclick="selectTime(this, '23:00')">23:00</button>
+                <button type="button" class="time-btn" data-time="00:00" onclick="selectTime(this, '00:00')">00:00</button>
+                <button type="button" class="time-btn" data-time="01:00" onclick="selectTime(this, '01:00')">01:00</button>
+              </div>
             </div>
           </div>
           <div class="modal-form-group">
@@ -1088,6 +1091,13 @@
         estado: 'pendiente'
       };
 
+      if (!reserva.hora) {
+        siteToast('Por favor seleccioná un horario', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<span class="btn-icon">📲</span> Reservar Cancha';
+        return;
+      }
+
       let saved = false;
       if (sbClient) {
         const { error } = await sbClient.from('reservas').insert(reserva);
@@ -1124,6 +1134,13 @@
     // ============================================================
     // DYNAMIC HOURS BLOCKING
     // ============================================================
+    function selectTime(btn, time) {
+      if (btn.disabled) return;
+      document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('resHora').value = time;
+    }
+
     async function updateAvailableHours() {
       if (!sbClient) {
         console.warn('Supabase Client not initialized');
@@ -1132,18 +1149,18 @@
 
       const sede = document.getElementById('resSede').value;
       const fecha = document.getElementById('resFecha').value;
-      const selectHora = document.getElementById('resHora');
+      const timeBtns = document.querySelectorAll('.time-btn');
 
-      if (!selectHora) return;
+      if (!timeBtns.length) return;
 
       console.log('Checking availability for:', { sede, fecha });
 
       // Reset hours status
-      Array.from(selectHora.options).forEach(opt => {
-        if (opt.value === '') return;
-        opt.disabled = false;
-        opt.textContent = opt.value; // Reset label
+      timeBtns.forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('selected');
       });
+      document.getElementById('resHora').value = '';
 
       if (!sede || !fecha) return;
 
@@ -1167,10 +1184,9 @@
           const takenHours = data.map(r => r.hora);
           console.log('Blocking these hours:', takenHours);
 
-          Array.from(selectHora.options).forEach(opt => {
-            if (takenHours.includes(opt.value)) {
-              opt.disabled = true;
-              opt.textContent = `${opt.value} (No disponible)`;
+          timeBtns.forEach(btn => {
+            if (takenHours.includes(btn.dataset.time)) {
+              btn.disabled = true;
             }
           });
         }

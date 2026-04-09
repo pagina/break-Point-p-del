@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin | Breakpoint Pádel</title>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="stylesheet" href="admin.css" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>" />
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>" />
 </head>
+
 <body>
 
   <!-- ===== TOAST CONTAINER ===== -->
@@ -140,7 +143,11 @@
                   </tr>
                 </thead>
                 <tbody id="dashReservasBody">
-                  <tr><td colspan="5" class="loading-spinner"><div class="spinner"></div></td></tr>
+                  <tr>
+                    <td colspan="5" class="loading-spinner">
+                      <div class="spinner"></div>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -183,7 +190,11 @@
                   </tr>
                 </thead>
                 <tbody id="reservasBody">
-                  <tr><td colspan="7" class="loading-spinner"><div class="spinner"></div></td></tr>
+                  <tr>
+                    <td colspan="7" class="loading-spinner">
+                      <div class="spinner"></div>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -218,7 +229,11 @@
                   </tr>
                 </thead>
                 <tbody id="mensajesBody">
-                  <tr><td colspan="6" class="loading-spinner"><div class="spinner"></div></td></tr>
+                  <tr>
+                    <td colspan="6" class="loading-spinner">
+                      <div class="spinner"></div>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -245,7 +260,11 @@
                   </tr>
                 </thead>
                 <tbody id="torneosBody">
-                  <tr><td colspan="7" class="loading-spinner"><div class="spinner"></div></td></tr>
+                  <tr>
+                    <td colspan="7" class="loading-spinner">
+                      <div class="spinner"></div>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -273,7 +292,11 @@
                   </tr>
                 </thead>
                 <tbody id="turnosBody">
-                  <tr><td colspan="8" class="loading-spinner"><div class="spinner"></div></td></tr>
+                  <tr>
+                    <td colspan="8" class="loading-spinner">
+                      <div class="spinner"></div>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -292,7 +315,9 @@
               </div>
             </div>
             <div class="gallery-admin-grid" id="galleryGrid">
-              <div class="loading-spinner"><div class="spinner"></div></div>
+              <div class="loading-spinner">
+                <div class="spinner"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -316,7 +341,9 @@
               </div>
             </div>
             <div class="menu-admin-grid" id="menuGrid">
-              <div class="loading-spinner"><div class="spinner"></div></div>
+              <div class="loading-spinner">
+                <div class="spinner"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -333,7 +360,9 @@
               </div>
             </div>
             <div class="content-editor-grid" id="contentGrid">
-              <div class="loading-spinner"><div class="spinner"></div></div>
+              <div class="loading-spinner">
+                <div class="spinner"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -1019,9 +1048,9 @@
         <div class="content-editor-card">
           <label>${contentLabels[item.id] || item.id}</label>
           ${item.content.length > 80
-            ? `<textarea data-content-id="${item.id}" rows="3">${escapeHtml(item.content)}</textarea>`
-            : `<input type="text" data-content-id="${item.id}" value="${escapeHtml(item.content)}" />`
-          }
+          ? `<textarea data-content-id="${item.id}" rows="3">${escapeHtml(item.content)}</textarea>`
+          : `<input type="text" data-content-id="${item.id}" value="${escapeHtml(item.content)}" />`
+        }
           <div class="save-indicator" id="saved-${item.id}">✓ Guardado</div>
         </div>
       `).join('');
@@ -1150,4 +1179,5 @@
   </script>
 
 </body>
+
 </html>
