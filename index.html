@@ -14,6 +14,7 @@
 </head>
 <body>
 
+
   <!-- Toast Notifications -->
   <div class="site-toast-container" id="siteToastContainer"></div>
 
@@ -804,6 +805,7 @@
     </a>
   </div>
 
+
   <!-- ========== RESERVATION MODAL ========== -->
   <div class="site-modal-overlay" id="reservaModal" onclick="closeSiteModal(event, 'reservaModal')">
     <div class="site-modal" onclick="event.stopPropagation()">
@@ -834,6 +836,15 @@
               <option value="Malagueño">📍 Sede Malagueño - Av. Malagueño 2406</option>
               <option value="O'Higgins">📍 Sede O'Higgins - Av. B. O'Higgins 5655</option>
               <option value="Epifanía">📍 Sede Epifanía - Epifanía Raspanti 14</option>
+            </select>
+          </div>
+          <div class="modal-form-group">
+            <label for="resCancha">Cancha *</label>
+            <select id="resCancha" onchange="updateAvailableHours()" required>
+              <option value="">Seleccioná una cancha</option>
+              <option value="Cancha 1">🎾 Cancha 1</option>
+              <option value="Cancha 2">🎾 Cancha 2</option>
+              <option value="Cancha 3">🎾 Cancha 3</option>
             </select>
           </div>
           <div class="modal-form-row">
@@ -1017,7 +1028,7 @@
     try {
       sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     } catch(e) {
-      console.warn('Supabase not loaded, forms will use WhatsApp fallback');
+      console.warn('Supabase not loaded');
     }
 
     // ============================================================
@@ -1087,6 +1098,7 @@
         sede: document.getElementById('resSede').value,
         fecha: document.getElementById('resFecha').value,
         hora: document.getElementById('resHora').value,
+        cancha: document.getElementById('resCancha').value,
         notas: document.getElementById('resNotas').value || '',
         estado: 'pendiente'
       };
@@ -1110,6 +1122,7 @@
         `Hola! Quiero reservar una cancha en Breakpoint Pádel:\n` +
         `📋 Nombre: ${reserva.nombre}\n` +
         `📍 Sede: ${reserva.sede}\n` +
+        `🎾 Cancha: ${reserva.cancha}\n` +
         `📅 Fecha: ${reserva.fecha}\n` +
         `🕐 Hora: ${reserva.hora}\n` +
         (reserva.notas ? `📝 Notas: ${reserva.notas}` : '')
@@ -1148,12 +1161,13 @@
       }
 
       const sede = document.getElementById('resSede').value;
+      const cancha = document.getElementById('resCancha').value;
       const fecha = document.getElementById('resFecha').value;
       const timeBtns = document.querySelectorAll('.time-btn');
 
       if (!timeBtns.length) return;
 
-      console.log('Checking availability for:', { sede, fecha });
+      console.log('Checking availability for:', { sede, cancha, fecha });
 
       // Reset hours status
       timeBtns.forEach(btn => {
@@ -1162,7 +1176,7 @@
       });
       document.getElementById('resHora').value = '';
 
-      if (!sede || !fecha) return;
+      if (!sede || !cancha || !fecha) return;
 
       try {
         // Query taken hours
@@ -1170,6 +1184,7 @@
           .from('reservas')
           .select('hora')
           .eq('sede', sede)
+          .eq('cancha', cancha)
           .eq('fecha', fecha)
           .neq('estado', 'cancelada');
 
@@ -1466,6 +1481,7 @@
 
     const heroStats = document.querySelector('.hero-stats');
     if (heroStats) heroObserver.observe(heroStats);
+
 
     // ============================================================
     // INIT - Wire up buttons after DOM ready

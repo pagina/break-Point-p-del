@@ -134,12 +134,13 @@
             <div style="overflow-x:auto">
               <table class="data-table" id="dashReservasTable">
                 <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Sede</th>
-                    <th>Fecha</th>
-                    <th>Hora</th>
-                    <th>Estado</th>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Sede</th>
+                      <th>Cancha</th>
+                      <th>Fecha</th>
+                      <th>Hora</th>
+                      <th>Estado</th>
                   </tr>
                 </thead>
                 <tbody id="dashReservasBody">
@@ -184,6 +185,7 @@
                     <th>Nombre</th>
                     <th>Teléfono</th>
                     <th>Sede</th>
+                    <th>Cancha</th>
                     <th>Hora</th>
                     <th>Estado</th>
                     <th>Acciones</th>
@@ -520,7 +522,7 @@
 
       const tbody = document.getElementById('dashReservasBody');
       if (!recentRes || recentRes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="empty-icon">📋</div><h4>Sin reservas aún</h4></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="empty-icon">📋</div><h4>Sin reservas aún</h4></td></tr>';
         return;
       }
 
@@ -528,6 +530,7 @@
         <tr>
           <td>${r.nombre}</td>
           <td>${r.sede}</td>
+          <td>${r.cancha || '-'}</td>
           <td>${formatDate(r.fecha)}</td>
           <td>${r.hora}</td>
           <td><span class="status-badge ${r.estado}">${r.estado}</span></td>
@@ -560,7 +563,7 @@
       const tbody = document.getElementById('reservasBody');
 
       if (error || !data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">📋</div><h4>No hay reservas</h4></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><div class="empty-icon">📋</div><h4>No hay reservas</h4></td></tr>';
         return;
       }
 
@@ -570,6 +573,7 @@
           <td><strong>${r.nombre}</strong></td>
           <td><a href="tel:${r.telefono}" style="color:var(--accent)">${r.telefono}</a></td>
           <td>${r.sede}</td>
+          <td>${r.cancha || '-'}</td>
           <td>${r.hora}</td>
           <td><span class="status-badge ${r.estado}">${r.estado}</span></td>
           <td>
